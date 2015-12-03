@@ -1,0 +1,250 @@
+//
+//  CKCountdownButtonTests.m
+//  CKCountdownButtonTests
+//
+//  Created by Quanlong He on 08/02/2014.
+//  Copyright (c) 2014 Quanlong He. All rights reserved.
+//
+
+SpecBegin(InitialSpecs)
+
+describe(@"Create a new CKCountdownButton", ^{
+
+    it(@"should in 'normal' state", ^{
+
+        CKCountdownButton *button = [[CKCountdownButton alloc] init];
+        expect(button.state).equal(UIControlStateNormal);
+    });
+});
+
+describe(@"Set 'count' to a CKCountdownButton", ^{
+
+    describe(@"and does not set 'Title'", ^{
+
+        describe(@"and does not set 'backgroundColorForDisableState'", ^{
+
+            it(@"should have 'count' set", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 10;
+
+                expect(button.count).equal(10);
+            });
+
+            it(@"should in 'disabled' state", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 10;
+
+                expect(button.state).equal(UIControlStateDisabled);
+            });
+
+            it(@"should not change background color", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                UIColor *expectedColor = button.backgroundColor;
+                button.count = 10;
+
+                expect(button.backgroundColor).equal(expectedColor);
+            });
+
+            it(@"should display title as 'Count'", ^{
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 10;
+
+                expect(button.titleLabel.text).equal(@"10");
+            });
+
+            it(@"should start counting down", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 3;
+
+                expect(button.titleLabel.text).to.equal(@"3");
+                expect(button.titleLabel.text).after(1).to.equal(@"2");
+                expect(button.titleLabel.text).after(2).to.equal(@"1");
+            });
+
+            it(@"should in 'normal' state after counted down", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 1;
+                
+                expect(button.state).after(1).to.equal(UIControlStateNormal);
+            });
+            
+            it(@"should display 'empty' title after counted down", ^{
+                
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 1;
+                
+                expect(button.titleLabel.text).after(2).to.equal(@"");
+            });
+        });
+
+        describe(@"and set 'backgroundColorForDisableState'", ^{
+            it(@"should display background color set", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.backgroundColorForDisabledState = [UIColor redColor];
+                button.count = 10;
+
+                expect(button.backgroundColor).equal([UIColor redColor]);
+            });
+
+            it(@"should display origin background color after counted down", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                UIColor *originColor = button.backgroundColor;
+
+                button.backgroundColorForDisabledState = [UIColor redColor];
+                button.count = 1;
+
+                expect(button.backgroundColor).after(1).to.equal(originColor);
+            });
+        });
+    });
+
+    describe(@"and set 'Disabled Title'", ^{
+
+        it(@"should display normal 'Title' after counted down", ^{
+
+            CKCountdownButton *button = [[CKCountdownButton alloc] init];
+            [button setTitle:@"Title" forState:UIControlStateNormal];
+            button.count = 1;
+
+            expect(button.titleLabel.text).after(1).to.equal(@"Title");
+        });
+
+        describe(@"and does not contain 'Placeholder", ^{
+
+            it(@"should display count as title", ^{
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                [button setTitle:@"Title" forState:UIControlStateDisabled];
+                button.count = 1;
+
+                expect(button.titleLabel.text).to.equal(@"1");
+            });
+        });
+
+        describe(@"and contains 'Placeholder", ^{
+
+            it(@"should display count embedded in title", ^{
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                [button setTitle:@"Title (#)" forState:UIControlStateDisabled];
+                button.count = 1;
+
+                expect(button.titleLabel.text).to.equal(@"Title (1)");
+            });
+        });
+    });
+});
+
+describe(@"Click CKCountdownButton", ^{
+
+    describe(@"when button is not counting", ^ {
+
+        describe(@"when startCountWhenClick is YES", ^ {
+
+            it(@"should start count", ^{
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.count = 1;
+
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                    [button sendActionsForControlEvents:UIControlEventTouchUpInside];
+                });
+
+                expect(button.state).after(2).to.equal(UIControlStateDisabled);
+            });
+        });
+
+        describe(@"when startCountWhenClick is NO", ^ {
+
+            it(@"should do start count", ^{
+
+                CKCountdownButton *button = [[CKCountdownButton alloc] init];
+                button.startCountWhenClick = NO;
+                button.count = 1;
+
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                    [button sendActionsForControlEvents:UIControlEventTouchUpInside];
+                });
+
+                expect(button.state).after(2).to.equal(UIControlStateNormal);
+            });
+        });
+
+
+    });
+});
+
+describe(@"Reuse exist CKCountdownButton", ^{
+
+    __block CKCountdownButton *button;
+
+    beforeAll(^{
+        button = [[CKCountdownButton alloc] init];
+        button.count = 1;
+    });
+
+    it(@"cannot modify count while counting ", ^{
+        button.count = 2;
+
+        expect(button.count).equal(1);
+        expect(button.count).after(2).to.equal(1);
+    });
+
+    it(@"can modify count after counted down ", ^AsyncBlock {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            button.count = 3;
+            done();
+        });
+
+        expect(button.count).after(2).to.equal(3);
+        expect(button.titleLabel.text).after(3).to.equal(@"2");
+        expect(button.titleLabel.text).after(4).to.equal(@"1");
+
+        expect(button.titleLabel.text).after(5).to.equal(@"");
+    });
+});
+
+describe(@"Reuse exist CKCountdownButton with title", ^{
+
+
+    it(@"can display customized title when re-counting ", ^{
+        CKCountdownButton *button = [[CKCountdownButton alloc] init];
+        [button setTitle:@"Title (#)" forState:UIControlStateDisabled];
+        button.count = 1;
+
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            button.count = 3;
+        });
+
+        expect(button.count).after(2).to.equal(3);
+        expect(button.titleLabel.text).after(3).to.equal(@"Title (2)");
+        expect(button.titleLabel.text).after(4).to.equal(@"Title (1)");
+
+        expect(button.titleLabel.text).after(5).to.equal(@"");
+    });
+});
+
+describe(@"Delegation", ^{
+    describe(@"when counted down", ^{
+
+        it(@"should invoke delegation", ^{
+            CKCountdownButton *button = [[CKCountdownButton alloc] init];;
+
+            // In a test
+            id mock = [OCMockObject mockForProtocol:@protocol(CKCountdownButtonDelegate)];
+
+            [[mock expect] buttonDidCountDown:button];
+
+            button.count = 1;
+            button.delegate = mock;
+
+            [mock verifyWithDelay:1.0];
+        });
+    });
+});
+
+SpecEnd
