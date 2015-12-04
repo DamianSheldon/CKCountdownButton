@@ -24,6 +24,7 @@
 // defaults to YES, start counting when click the button
 @property(nonatomic) BOOL startCountWhenClick;
 
+- (void)startClockTimer;
 /**
  *  添加终止计时器时钟的方法
  */

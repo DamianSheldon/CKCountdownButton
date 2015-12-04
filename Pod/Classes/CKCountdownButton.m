@@ -54,7 +54,7 @@ static NSString* PLACEHOLDER = @"#";
 }
 
 - (void)initialize {
-    [self addTarget:self action:@selector(onClick) forControlEvents:UIControlEventTouchUpInside];
+//    [self addTarget:self action:@selector(onClick) forControlEvents:UIControlEventTouchUpInside];
     self.startCountWhenClick = YES;
 }
 
@@ -119,10 +119,9 @@ static NSString* PLACEHOLDER = @"#";
     }
 }
 
-- (void)onClick {
+- (void)startClockTimer {
 
-    if (!self.counting && self.startCountWhenClick) {
-//        self.count = self.count;
+    if (self.count > 0 && self.startCountWhenClick) {
         
         self.enabled = NO;
         self.counting = YES;

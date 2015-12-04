@@ -28,9 +28,11 @@
     self.fetchVerifyButton.count = 60;
 }
 
-- (void)handleFetchVerifyCode:(id)sender
+- (void)handleFetchVerifyCode:(CKCountdownButton *)sender
 {
     NSLog(@"%s", __func__);
+    
+    [sender startClockTimer];
 }
 
 @end
